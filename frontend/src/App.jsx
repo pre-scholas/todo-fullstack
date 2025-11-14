@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import Form from "./components/Form"
-import TodoList from "./components/TodoList"
+import Form from "../components/Form"
+import TodoList from "../components/TodoList"
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL
 
