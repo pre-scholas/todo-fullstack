@@ -11,6 +11,7 @@ const app = express()
 
 const port = 8080
 
+app.use(express.json())
 app.use(cors())
 
 app.get('/', (req, res) => {
@@ -29,10 +30,22 @@ app.get('/todos', async (req, res) => {
 
 app.post('/todos', async (req, res) => {
     try {
+        console.log(req.body);
         const todo = await Todo.create(req.body)
         res.status(200).json(todo)
     } catch (e) {
         console.log(e.message)
+        res.status(400).json({ error: e.message })
+    }
+})
+
+app.delete('/todos/:id', async (req, res) => {
+    try {
+        const response = await Todo.findByIdAndDelete(req.params.id)
+        console.log(response)
+        res.status(200).json(response)
+    } catch (e) {
+        console.log(e)
         res.status(400).json({ error: e.message })
     }
 })

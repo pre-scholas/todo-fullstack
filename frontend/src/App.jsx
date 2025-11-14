@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from "react"
 
+// CRUD 
+
+// Create - POST
+// Read - GET
+// Update - PUT/PATCH
+// Delete - DELETE
+
 function App() {
 
-  const [todos, setTodos] = useState([{ text: "Lunch", completed: false, _id: 1 }])
+  const [todos, setTodos] = useState([])
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -10,7 +17,7 @@ function App() {
       const response = await fetch('http://localhost:8080/todos')
       const data = await response.json()
       console.log(data)
-      // setTodos(data)
+      setTodos(data)
     }
     getTodos()
   }, [])
@@ -43,6 +50,40 @@ function App() {
       console.log(e)
     }
 
+    inputRef.current.value = ''
+    inputRef.current.focus()
+
+  }
+
+  async function handleDelete(id) {
+    console.log('handleDelete')
+    try {
+      const response = await fetch(`http://localhost:8080/todos/${id}`, {
+        method: 'DELETE'
+      })
+      const result = await response.json()
+      console.log(result)
+
+      const newTodos = todos.filter((todo) => todo._id !== id)
+
+      setTodos(newTodos)
+
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  async function handleUpdate(id) {
+    try {
+      console.log('handleUpdate')
+      const response = await fetch(`http://localhost:8080/todos/${id}`, {
+        method: "PUT"
+      })
+      const result = await response.json()
+      console.log(result)
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   return (
@@ -61,9 +102,10 @@ function App() {
             <input
               type="checkbox"
               checked={todo.completed}
-              onChange={() => { }}
+              onChange={() => handleUpdate(todo._id)}
             />
             {todo.text}
+            <button onClick={() => handleDelete(todo._id)}>X</button>
           </li>
         )}
       </ul>
