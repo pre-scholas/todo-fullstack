@@ -1,24 +1,22 @@
 import { useEffect, useRef, useState } from "react"
+import Form from "./components/Form"
+import TodoList from "./components/TodoList"
 
-// CRUD 
-
-// Create - POST
-// Read - GET
-// Update - PUT/PATCH
-// Delete - DELETE
+export const BASE_URL = import.meta.env.VITE_BASE_URL
 
 function App() {
 
   const [todos, setTodos] = useState([])
   const inputRef = useRef(null)
 
+  async function getTodos() {
+    const response = await fetch(`${BASE_URL}/todos`)
+    const data = await response.json()
+    console.log(data)
+    setTodos(data)
+  }
+
   useEffect(() => {
-    async function getTodos() {
-      const response = await fetch('http://localhost:8080/todos')
-      const data = await response.json()
-      console.log(data)
-      setTodos(data)
-    }
     getTodos()
   }, [])
 
@@ -32,7 +30,7 @@ function App() {
 
     try {
 
-      const response = await fetch('http://localhost:8080/todos', {
+      const response = await fetch(`${BASE_URL}/todos`, {
         method: "POST",
         body: JSON.stringify(todo),
         headers: {
@@ -56,13 +54,11 @@ function App() {
   }
 
   async function handleDelete(id) {
-    console.log('handleDelete')
     try {
-      const response = await fetch(`http://localhost:8080/todos/${id}`, {
+
+      await fetch(`${BASE_URL}/todos/${id}`, {
         method: 'DELETE'
       })
-      const result = await response.json()
-      console.log(result)
 
       const newTodos = todos.filter((todo) => todo._id !== id)
 
@@ -75,12 +71,15 @@ function App() {
 
   async function handleUpdate(id) {
     try {
-      console.log('handleUpdate')
-      const response = await fetch(`http://localhost:8080/todos/${id}`, {
+
+      await fetch(`${BASE_URL}/todos/${id}`, {
         method: "PUT"
       })
-      const result = await response.json()
-      console.log(result)
+
+      const updatedTodos = todos.map((todo) => (todo._id === id ? { ...todo, completed: !todo.completed } : todo))
+
+      setTodos(updatedTodos)
+
     } catch (e) {
       console.log(e)
     }
@@ -89,26 +88,15 @@ function App() {
   return (
     <>
       <h1>Todos</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          ref={inputRef}
-          required={true}
-        />
-        <button>Submit</button>
-      </form>
-      <ul>
-        {todos.map((todo) =>
-          <li key={todo._id}>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => handleUpdate(todo._id)}
-            />
-            {todo.text}
-            <button onClick={() => handleDelete(todo._id)}>X</button>
-          </li>
-        )}
-      </ul>
+      <Form
+        handleSubmit={handleSubmit}
+        inputRef={inputRef}
+      />
+      <TodoList
+        todos={todos}
+        handleDelete={handleDelete}
+        handleUpdate={handleUpdate}
+      />
     </>
   )
 }
